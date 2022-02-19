@@ -30,12 +30,27 @@ const modFrame = switch (arch) {
 
 pub const Frame = modFrame.Frame;
 
+const modArchInterrupt = switch (arch) {
+    Arch.aarch64 => @import("aarch64/interrupt.zig"),
+    else => @panic("Unknown CPU architecture!"),
+};
+
+pub const acknowledgeInterrupt = modArchInterrupt.acknowledge;
+pub const disableInterrupt = modArchInterrupt.disable;
+pub const enableInterrupt = modArchInterrupt.enable;
+
+const modInterrupt = @import("interrupt.zig");
+
+pub const Interrupt = modInterrupt.Interrupt;
+
 const modIntrinsics = switch (arch) {
     Arch.aarch64 => @import("aarch64/intrinsics.zig"),
     else => @panic("Unknown CPU architecture!"),
 };
 
 pub const breakpoint = modIntrinsics.breakpoint;
+pub const disableInterrupts = modIntrinsics.disableInterrupts;
+pub const enableInterrupts = modIntrinsics.enableInterrupts;
 pub const waitForInterrupt = modIntrinsics.waitForInterrupt;
 
 const modTimer = switch (arch) {
@@ -44,6 +59,7 @@ const modTimer = switch (arch) {
 };
 
 pub const getMonotonicTimestamp = modTimer.getMonotonicTimestamp;
+pub const scheduleTimer = modTimer.scheduleTimer;
 
 const modTrap = @import("trap.zig");
 

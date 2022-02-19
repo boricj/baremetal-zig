@@ -1,6 +1,7 @@
 const std = @import("std");
 
 const modCpu = @import("cpu.zig");
+const modInterrupt = @import("interrupt.zig");
 const modIntrinsics = @import("intrinsics.zig");
 const modFrame = @import("frame.zig");
 
@@ -10,8 +11,11 @@ const modThread = @import("../../thread/api.zig");
 const ExceptionClass = modCpu.ExceptionSyndrome.ExceptionClass;
 const ExceptionType = modCpu.ExceptionType;
 const Frame = modFrame.Frame;
+const Interrupt = modHal.Interrupt;
+const nextPendingInterrupt = modInterrupt.nextPendingInterrupt;
 const readESR_EL1 = modIntrinsics.readESR_EL1;
 const readFAR_EL1 = modIntrinsics.readFAR_EL1;
+const TIMER_INTERRUPT = modInterrupt.TIMER_INTERRUPT;
 const Trap = modHal.Trap;
 const VirtualAddress = modHal.VirtualAddress;
 const waitForInterrupt = modIntrinsics.waitForInterrupt;
@@ -170,6 +174,14 @@ fn buildTrap(frame: *Frame, exceptionType: ExceptionType) Trap {
     };
 }
 
+fn buildInterrupt(frame: *Frame, number: u32) Interrupt {
+    return Interrupt{
+        .frame = frame,
+        .number = number,
+        .isTimer = (number == TIMER_INTERRUPT),
+    };
+}
+
 pub fn initializeVectorEL1() void {
     writeVBAR_EL1(@ptrToInt(&el1_vector_table));
 }
@@ -179,8 +191,10 @@ pub fn initializeVectorEL1() void {
 // calling its hal.Trap.frame.switchTo() function.
 export fn handleExceptionEL1(frame: *Frame, exceptionType: ExceptionType) noreturn {
     _ = switch (exceptionType) {
-        ExceptionType.SYNCHRONOUS_EL1H => modThread.handleTrap(buildTrap(frame, exceptionType)),
-        ExceptionType.SYNCHRONOUS_AARCH64_EL0 => modThread.handleTrap(buildTrap(frame, exceptionType)),
+        ExceptionType.IRQ_EL1T, ExceptionType.FIQ_EL1T, ExceptionType.IRQ_EL1H, ExceptionType.FIQ_EL1H, ExceptionType.IRQ_AARCH64_EL0, ExceptionType.FIQ_AARCH64_EL0 => if (nextPendingInterrupt()) |number| {
+            modThread.handleInterrupt(buildInterrupt(frame, number));
+        },
+        ExceptionType.SYNCHRONOUS_EL1H, ExceptionType.SYNCHRONOUS_AARCH64_EL0 => modThread.handleTrap(buildTrap(frame, exceptionType)),
         else => false,
     };
 

@@ -1,5 +1,6 @@
 const std = @import("std");
 
+const interrupt = @import("interrupt.zig");
 const intrinsics = @import("intrinsics.zig");
 const vector = @import("vector.zig");
 
@@ -20,6 +21,7 @@ pub fn start() callconv(.Naked) noreturn {
         \\ and sp, x30, #0xfffffffffffffff0
     );
     vector.initializeVectorEL1();
+    interrupt.initialize();
 
     std.log.debug("Calling main()", .{});
     main();
