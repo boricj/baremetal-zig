@@ -8,8 +8,15 @@
 const builtin = @import("builtin");
 const std = @import("std");
 
-const Arch = std.Target.Cpu.Arch;
 const arch = builtin.cpu.arch;
+const Arch = std.Target.Cpu.Arch;
+
+const modDebugWriter = switch (arch) {
+    Arch.aarch64 => @import("aarch64/debugWriter.zig"),
+    else => @panic("Unknown CPU architecture!"),
+};
+
+pub const debugWriter = modDebugWriter.debugWriter;
 
 const modIntrinsics = switch (arch) {
     Arch.aarch64 => @import("aarch64/intrinsics.zig"),
