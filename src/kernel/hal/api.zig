@@ -11,6 +11,11 @@ const std = @import("std");
 const arch = builtin.cpu.arch;
 const Arch = std.Target.Cpu.Arch;
 
+const modAddress = @import("address.zig");
+
+pub const PhysicalAddress = modAddress.PhysicalAddress;
+pub const VirtualAddress = modAddress.VirtualAddress;
+
 const modDebugWriter = switch (arch) {
     Arch.aarch64 => @import("aarch64/debugWriter.zig"),
     else => @panic("Unknown CPU architecture!"),
@@ -18,11 +23,19 @@ const modDebugWriter = switch (arch) {
 
 pub const debugWriter = modDebugWriter.debugWriter;
 
+const modFrame = switch (arch) {
+    Arch.aarch64 => @import("aarch64/frame.zig"),
+    else => @panic("Unknown CPU architecture!"),
+};
+
+pub const Frame = modFrame.Frame;
+
 const modIntrinsics = switch (arch) {
     Arch.aarch64 => @import("aarch64/intrinsics.zig"),
     else => @panic("Unknown CPU architecture!"),
 };
 
+pub const breakpoint = modIntrinsics.breakpoint;
 pub const waitForInterrupt = modIntrinsics.waitForInterrupt;
 
 const modTimer = switch (arch) {
@@ -31,6 +44,10 @@ const modTimer = switch (arch) {
 };
 
 pub const getMonotonicTimestamp = modTimer.getMonotonicTimestamp;
+
+const modTrap = @import("trap.zig");
+
+pub const Trap = modTrap.Trap;
 
 const modTimestamp = @import("timestamp.zig");
 

@@ -45,4 +45,6 @@ pub fn log(
 // Architecture-independent entrypoint for the kernel, called by the HAL.
 export fn main() void {
     std.log.info("All your codebase are belong to us.", .{});
+    std.log.warn("Executing breakpoint instruction.", .{});
+    hal.breakpoint();
 }

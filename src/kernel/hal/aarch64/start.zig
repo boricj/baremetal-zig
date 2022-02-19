@@ -1,6 +1,7 @@
 const std = @import("std");
 
 const intrinsics = @import("intrinsics.zig");
+const vector = @import("vector.zig");
 
 extern fn main() void;
 
@@ -18,6 +19,7 @@ pub fn start() callconv(.Naked) noreturn {
         \\ ldr x30, =stack_top
         \\ and sp, x30, #0xfffffffffffffff0
     );
+    vector.initializeVectorEL1();
 
     std.log.debug("Calling main()", .{});
     main();
