@@ -34,7 +34,10 @@ pub fn log(
         std.log.Level.debug => "\x1b[36m", // Cyan
     };
 
-    hal.debugWriter.print(color, .{}) catch unreachable;
+    const timestamp = hal.getMonotonicTimestamp();
+
+    // The timestamp is formatted without using floating point variables.
+    hal.debugWriter.print(color ++ "[{d: >9}.{d:0>9}] ", .{ timestamp.getSeconds(), timestamp.getNanoseconds() }) catch unreachable;
     hal.debugWriter.print(prefix ++ format, args) catch unreachable;
     hal.debugWriter.print("\x1b[00m\n", .{}) catch unreachable; // Reset colors.
 }

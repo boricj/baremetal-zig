@@ -25,6 +25,17 @@ const modIntrinsics = switch (arch) {
 
 pub const waitForInterrupt = modIntrinsics.waitForInterrupt;
 
+const modTimer = switch (arch) {
+    Arch.aarch64 => @import("aarch64/timer.zig"),
+    else => @panic("Unknown CPU architecture!"),
+};
+
+pub const getMonotonicTimestamp = modTimer.getMonotonicTimestamp;
+
+const modTimestamp = @import("timestamp.zig");
+
+pub const Timestamp = modTimestamp.Timestamp;
+
 const modStart = switch (arch) {
     Arch.aarch64 => @import("aarch64/start.zig"),
     else => @panic("Unknown CPU architecture!"),
