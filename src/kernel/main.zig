@@ -47,4 +47,6 @@ export fn main() void {
     std.log.info("All your codebase are belong to us.", .{});
     std.log.warn("Executing breakpoint instruction.", .{});
     hal.breakpoint();
+    std.log.warn("Executing breakpoint instruction.", .{});
+    hal.breakpoint();
 }

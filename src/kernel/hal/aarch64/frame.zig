@@ -66,6 +66,42 @@ pub const Frame = packed struct {
             try writer.print("{s: >4}=0x{x:0>16}", .{ f.name, @field(self, f.name) });
         }
     }
+
+    // The switchTo() method resumes the execution of a frame. It is marked as
+    // no return because upon executing the eret instruction the processor will
+    // jump back into this execution context, possibly changing exception
+    // levels too, at which point the current exception context will have been
+    // overwritten and cannot be returned to.
+    pub fn switchTo(self: Frame) noreturn {
+        asm volatile (
+            \\ ldp x2, x3, [x0, #248]
+            \\ ldr x4, [x0, #264]
+            \\ mov sp, x2
+            \\ msr SP_EL0, x2
+            \\ msr ELR_EL1, x3
+            \\ msr SPSR_EL1, x4
+            \\ ldp x2, x3, [x0, #16]
+            \\ ldp x4, x5, [x0, #32]
+            \\ ldp x6, x7, [x0, #48]
+            \\ ldp x8, x9, [x0, #64]
+            \\ ldp x10, x11, [x0, #80]
+            \\ ldp x12, x13, [x0, #96]
+            \\ ldp x14, x15, [x0, #112]
+            \\ ldp x16, x17, [x0, #128]
+            \\ ldp x18, x19, [x0, #144]
+            \\ ldp x20, x21, [x0, #160]
+            \\ ldp x22, x23, [x0, #176]
+            \\ ldp x24, x25, [x0, #192]
+            \\ ldp x26, x27, [x0, #208]
+            \\ ldp x28, x29, [x0, #224]
+            \\ ldr x30, [x0, #224]
+            \\ ldp x0, x1, [x0, #0]
+            \\ eret
+            :
+            : [self] "{x0}" (self),
+        );
+        unreachable;
+    }
 };
 
 comptime {
